@@ -70,7 +70,7 @@ More details on [Github blog](https://github.com/blog/1270-easier-builds-and-dep
 
 Encrypt your Github token
 
-	travis encrypt MY_SECRET_ENV=super_secret
+	travis encrypt GH_TOKEN=your_token
 
 and add it to `.travis.yml`
 
