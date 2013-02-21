@@ -1,10 +1,12 @@
 ---
 layout: post
-title: "prose-io-github-travis-ci"
+title: "Octopress+Prose+Github+Travis CI = coders' blog"
 date: 2013-02-21 23:40
 comments: true
 categories: 
+published: true
 ---
+
 # Introduction
 
 This is powered by the following project or services
