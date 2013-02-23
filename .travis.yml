@@ -15,4 +15,4 @@ after_script:
 env:
   global:
   - GH_REPO="rogerz/rogerz.github.com"
-  - secure: "V+j9SSuxyhwN5fB3b6Xj7WZ6kuuaSgCTHaiHHfGtPfwSCBZtxmaLrUdbuOEG\nKKpk0UX5nJoqEM0nmgAT1I5KKI2vkx4TX+mHnNQ0rUInipXTf7C9z/42OxKM\nrY5wgcD0G8ChccFAzJNYqFEXXkmiaYDWxjwlslA8pOZKSmHH8z4="
+  - secure: "cSwATwZddJKGqmF48Ep4d793AoR/L1jWyI3UY0C1Iibki3ZAG0qJltFZSNLZ\n069af3y9RQ10420ihTi8ck0xjPbftncPyYLsiX2ni26l+uA2jwKSW8NG++/W\nKcQcTgXzzgyDzAEPPib9vr7Hk7tHsXkqTxcwPMmT0u4YCC8MRHs="
