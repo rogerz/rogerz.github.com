@@ -2,7 +2,7 @@
 layout: post
 title: "How to use commander.js"
 comments: true
-categories: nodejs,code
+categories: code
 published: true
 
 ---
