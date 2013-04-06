@@ -3,7 +3,7 @@ layout: post
 title: "Octopress+Prose+Github+Travis CI = coders' blog"
 date: 2013-02-21 23:40
 comments: true
-categories: 
+categories: guide
 published: true
 ---
 
