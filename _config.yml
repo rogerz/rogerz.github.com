@@ -106,5 +106,5 @@ prose:
       layout: post
       title: "Title"
       comments: true
-      categories: 
+      categories: "misc"
       published: true
