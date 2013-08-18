@@ -3,16 +3,6 @@ published:
   - true
   - "true"
 layout: post
-title: windjs中的JIT compiler
-comments: "true"
-categories: misc
----
-
----
-published: 
-  - true
-  - "true"
-layout: post
 title: JIT compiler in windjs
 comments: "true"
 categories: nodejs
