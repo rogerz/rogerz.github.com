@@ -39,4 +39,4 @@ We can verify this by changing `time` to `time1` and we'll see the program break
 
 Thus, the **name** of function argument plays an important role in AngularJS. The sequence of the argument does not matter much.
 
-If you have a look at the code of `injection
+If you have a look at the code of [`injector`](https://github.com/angular/angular.js/blob/master/src/auto/injector.js), you may get an idea on how it works. The function declaration is converted to string using `.toString()` and the arguments are parsed and pushed into an array. The function will not be called directly but invoked by the `function invoke()`, which will then resolve the injection and apply the actual argument required.
