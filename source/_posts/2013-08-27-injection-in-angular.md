@@ -1,7 +1,7 @@
 ---
 published: 
   - true
-  - "false"
+  - "true"
 layout: post
 title: Dependency injection in AngularJS
 comments: "true"
