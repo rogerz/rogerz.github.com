@@ -5,7 +5,7 @@ published:
 layout: post
 title: Dependency injection in AngularJS
 comments: "true"
-categories: JavaScript
+categories: angularjs
 ---
 
 One of the interesting feature of AngularJS is dependency injection.
