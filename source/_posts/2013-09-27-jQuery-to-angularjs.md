@@ -1,11 +1,11 @@
 ---
 published: 
   - true
-  - "false"
+  - "true"
 layout: post
 title: How to create AngularJS directive for jQuery input plugin
 comments: "true"
-categories: "angularjs, jQuery"
+categories: angularjs jQuery
 ---
 
 To wrap a jQuery input plugin in AngularJS directive and allow data-binding, there are essentially three steps.
