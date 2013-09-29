@@ -109,4 +109,4 @@ An example of this will be storing date as an integer and display it in specifie
 
 ## Example
 
-The full example can be found on [plunker](http://www.plnkr.co/edit/UIO0V2?p=preview)
+The full example can be found on [plunker](http://plnkr.co/edit/RfRsWZ?p=preview)
