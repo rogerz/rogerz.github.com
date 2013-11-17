@@ -3,12 +3,13 @@ published:
   - true
   - "true"
 layout: post
-title: How does generator behaviour
+title: How does generator behave
+
 comments: "true"
 categories: javascript
 ---
 
-Generator is something new in ES6. It is quite interesting to explore how it behavious.
+Generator is something new in ES6. It is quite interesting to explore how it behaves.
 
 ## Example
 
@@ -41,7 +42,7 @@ console.log(_);
 
 This script requires nodejs v0.11 with `--harmony-generators`
 
-```
+```bash
 $ nvm use 0.11
 Now using node v0.11.8
 $ node --harmony-generators index.js
@@ -67,7 +68,7 @@ Let's try to understand how this comes out.
 
 The most magic part is in `yield`. The execution of `var a = yield 1` is splitted into two steps;
 
-1. The first call `iterator.next(x)` will execute `yield 1` and gets the value `1` from it. But at this moment, `a` is not assigned any value yet. The argument of first `next()` call seems to be dummy. You could not catch `x` in generator as in the example above.
+1. The first call `iterator.next('x')` will execute `yield 1` and gets the value `1` from it. But at this moment, `a` is not assigned any value yet. The argument of first `next()` call seems to be dummy. You could not catch `x` in generator as in the example above.
 2. The second call `iterator.next('y')` will complete the execution of `yield 1`. The argument `'y'` becomes the return value of `yield 1`, thus `a` is assigned value `'y'`
 
 Finally, `iterator.next('y')` will get value from next yield, i.e. `yield 2`.
