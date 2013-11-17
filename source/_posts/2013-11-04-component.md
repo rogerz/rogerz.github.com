@@ -1,11 +1,9 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: Developing web app client with component
-comments: "true"
-categories: webapp
+comments: true
+categories: component package-manager
 ---
 
 [component](https://github.com/component/component) is a client package management ecosystem. It aims to resolve serveral pain points in web development.

@@ -2,7 +2,7 @@
 layout: post
 title: "Inside 'Hello world' of Sinatra"
 comments: true
-categories: code
+categories: ruby
 published: true
 
 ---

@@ -1,10 +1,8 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: Understanding AngularJS in unit test
-comments: "true"
+comments: true
 categories: angularjs
 ---
 

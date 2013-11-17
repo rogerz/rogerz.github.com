@@ -1,10 +1,8 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: Dependency injection in AngularJS
-comments: "true"
+comments: true
 categories: angularjs
 ---
 

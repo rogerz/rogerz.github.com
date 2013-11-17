@@ -1,11 +1,8 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: How does generator behave
-
-comments: "true"
+comments: true
 categories: javascript
 ---
 

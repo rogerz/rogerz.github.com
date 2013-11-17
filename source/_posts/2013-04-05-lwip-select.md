@@ -2,7 +2,7 @@
 layout: post
 title: "select() in lwip"
 comments: true
-categories: code
+categories: embedded
 published: true
 
 ---

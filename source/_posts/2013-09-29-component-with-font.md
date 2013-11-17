@@ -1,11 +1,9 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: Using javascript components with customized font
-comments: "true"
-categories: css font
+comments: true
+categories: component font css
 ---
 
 Some front-end components includes customized font. When using these modules in your project, it is important to put the font files in the right place.

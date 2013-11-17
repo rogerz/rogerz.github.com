@@ -1,10 +1,8 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: How to create AngularJS directive for jQuery input plugin
-comments: "true"
+comments: true
 categories: angularjs jQuery
 ---
 

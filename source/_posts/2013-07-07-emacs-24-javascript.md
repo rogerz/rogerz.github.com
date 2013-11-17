@@ -1,10 +1,9 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: Using emacs as nodejs develop enviroment
-comments: "true"
+comments: true
+category: emacs
 ---
 
 There was a nice [article](http://blog.deadpansincerity.com/2011/05/setting-up-emacs-as-a-javascript-editing-environment-for-fun-and-profit/) talking about using Emacs as javascript editing environment. Thanks to the support of [packages in Emacs 24](http://www.emacswiki.org/emacs/ELPA), it is now much easier to config it. And there are also many new packages available to improve the environment.

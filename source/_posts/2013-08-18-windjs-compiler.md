@@ -1,11 +1,9 @@
 ---
-published: 
-  - true
-  - "true"
+published: true
 layout: post
 title: JIT compiler in windjs
-comments: "true"
-categories: nodejs
+comments: true
+categories: javascript
 ---
 
 javascript是一个神奇的语言，在“简单”的语法规则背后可以作出许多匪夷所思的事情，例如[windjs](windjs.org)中的compile，某种程度上实现了在运行时对函数进行重新编译，甚至重载了javascript最基本的关键字`if`, `for`等。
