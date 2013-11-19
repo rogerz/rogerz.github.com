@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Octopress+Prose+Github+Travis CI = coders' blog"
-date: 2013-02-21 23:40
+date: "2013-02-21 23:40"
 comments: true
 categories: guide
 published: true
@@ -26,23 +26,43 @@ This is not difficult, just follow the steps on [Octopress Document](http://octo
 
 Just add the following content to `_config.yml`. This file is used both by Octopress and Prose.
 
-    #prose.io settings 
-    prose: 
-      rooturl: "source" 
-      metadata: 
-        "source/_posts": | 
-          layout: post 
-          title: "Title" 
-          comments: true 
-          categories:  
-          published: true 
+```yaml
+#prose.io settings 
+prose:
+  rooturl: "source"
+  metadata:
+    "source/_posts":
+      - name: "layout"
+        field:
+          element: "hidden"
+          value: "post"
+      - name: "title"
+        field:
+          element: "text"
+          value: "Title"
+      - name: "comments"
+        field:
+          label: "Allow comments"
+          element: "checkbox"
+          value: true
+      - name: "categories"
+        field:
+          element: "text"
+          value: "misc"
+      - name: "published"
+        field:
+          label: "Published"
+          element: "checkbox"
+          value: true
+```
 
-Refer to [Prose handbook](prose.io/help/handbook.html) for details
+Refer to [Prose wiki](https://github.com/prose/prose/wiki/Prose-Configuration) for details
 
 ## Step 3 - create a Github OAuth token for Travis CI
 
 This provide a relative secure way to push content to your Github repository from Travis CI.
 
+```bash
     curl -u 'rogerz' -d '{"scopes":["public_repo"], "note":"Travis access"}' https://api.github.com/authorizations
     
     Enter host password for user 'rogerz':
@@ -63,6 +83,7 @@ This provide a relative secure way to push content to your Github repository fro
 	    "public_repo"
       ]
     }
+```
 
 More details on [Github blog](https://github.com/blog/1270-easier-builds-and-deployments-using-git-over-https-and-oauth).
 
@@ -74,6 +95,7 @@ Encrypt your Github token
 
 and add it to `.travis.yml`
 
+```yaml
     ---
     branches:
       only:
@@ -92,34 +114,41 @@ and add it to `.travis.yml`
       global:
       - GH_REPO="rogerz/rogerz.github.com"
       - secure: "V+j9SSuxyhwN5fB3b6Xj7WZ6kuuaSgCTHaiHHfGtPfwSCBZtxmaLrUdbuOEG\nKKpk0UX5nJoqEM0nmgAT1I5KKI2vkx4TX+mHnNQ0rUInipXTf7C9z/42OxKM\nrY5wgcD0G8ChccFAzJNYqFEXXkmiaYDWxjwlslA8pOZKSmHH8z4="
-      
+```
+
 More on [Travis CI help](http://about.travis-ci.org/docs/user/build-configuration/#Secure-environment-variables)
 
 ## Step 5 - customize the `Rakefile`
 
 Hide Github token during `rake`
 
+```diff
     -      puts "Added remote #{repo_url} as origin"
     +      puts "Added remote as origin" # don't put repo_url in travis-ci as it may contains token
 
     -    system "git push origin #{deploy_branch} --force"
     +    system "git push origin #{deploy_branch} --force --quiet" # hide github token
+```
 
 Modify regex to parse url of HTTPS
 
+```diff
     -    puts "(For example, 'git@github.com:your_username/your_username.github.com)"
     +    puts "(For example, 'git@github.com:your_username/your_username.github.com' or 'https://github.com/your_username/your_username.github.com')"
 
     -  user = repo_url.match(/:([^\/]+)/)[1]
     +  user = repo_url.match(/[\/:]([^\/]+)\/[^\/]+$/)[1]
+```
 
 Skip unnecessary building in Travis CI ([More](http://about.travis-ci.org/docs/user/how-to-skip-a-build/)).
 
+```diff
     -    message = "Site updated at #{Time.now.utc}"
     +    message = "Site updated at #{Time.now.utc}\n\n[ci skip]"
 
     -    system "git commit -m \"Octopress init\""
     +    system "git commit -m \"Octopress init\n\n[ci skip]\""
+```
 
 ## Step 6 - turn on Travis CI and push
 
