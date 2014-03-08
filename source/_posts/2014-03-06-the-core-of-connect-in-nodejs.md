@@ -41,25 +41,30 @@ function next() {
     // get next layer from stack
     layer = stack[index++];
     // let the layer handle the request
-    layer.handle(req, res);
-    next();
+    layer.handle(req, res, next);
 }
 ```
 
-But we won't call it a nodejs module without callback. So `next` is passed to the handler so **err can be returned**.
+## The Core
 
-The majority part of the `next()` is the default error handling of connect.
+Normally the layer handler should call `next()` explicitly to advance to next layer. Otherwise if the handler is not valid (checking arity) or an exception is thrown. `next()` will call itself to find an error handler.
 
 ```javascript
-function next(err) {
-    // error handling
-    try {
-        // call the handler
-    } catch (e) {
-        next(e);
-    }
-}
+      var arity = layer.handle.length;
+      if (err) {
+        if (arity === 4) {
+          layer.handle(err, req, res, next);
+        } else {
+          next(err);
+        }
+      } else if (arity < 4) {
+        layer.handle(req, res, next);
+      } else {
+        next();
+      }
 ```
+
+In my opinion, this part is indeed the **core of connect**. Simple and flexible, worth reading and thinking through how the application goes under different scheme and condition.
 
 ## Conclusion
 
@@ -67,4 +72,4 @@ Connect has some other parts such as routing and http header process. Before 3.x
 
 The core of connect is not binded to http, it is applicable for all request-response model. 
 
-This is something I'm working on recently. A connect like middleware framework for wechat: [wechat-handler](https://github.com/rogerz/wechat-handler).
+This is something I'm working on recently. A connect like middleware framework for wechat: [wechat-bot](https://github.com/rogerz/wechat-bot).
