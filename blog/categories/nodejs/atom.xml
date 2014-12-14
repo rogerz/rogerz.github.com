@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: nodejs | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/nodejs/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[The core of connect in nodejs]]></title>
+    <link href="http://rogerz.github.com/blog/2014/03/06/the-core-of-connect-in-nodejs/"/>
+    <updated>2014-03-06T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2014/03/06/the-core-of-connect-in-nodejs</id>
+    <content type="html"><![CDATA[<p><a href="http://www.senchalabs.org/connect/">Connect</a> describes itself as a middleware framework. The <a href="https://github.com/senchalabs/connect/blob/master/lib/proto.js">core of connect</a> is in less than hundreds lines of code.</p>
+
+<h2>Philosophy</h2>
+
+<p>As the name implies, the core function of connect is connecting the <strong>middleware</strong> together to build a http server. In fact it may also connect the "connect" <strong>apps</strong>.</p>
+
+<p>A simple visualization by text list</p>
+
+<ul>
+<li>app
+
+<ul>
+<li>mw1</li>
+<li>sub-app
+
+<ul>
+<li>mw2</li>
+<li>mw3</li>
+</ul>
+</li>
+<li>mw4</li>
+</ul>
+</li>
+</ul>
+
+
+<p>The http request is handled by the root app, passed through the middleware or down to sub-app. During this procedure, the response is constructed and finally sent to the http client.</p>
+
+<h2>How does it work</h2>
+
+<p>In connect, sub-apps are wrapped as a middleware. So the basic structure connect is</p>
+
+<ul>
+<li>app
+
+<ul>
+<li>mw1</li>
+<li>mw2</li>
+<li>mw3</li>
+</ul>
+</li>
+</ul>
+
+
+<p>The control flow is implemented in <code>app.handle()</code>. All the middlewares are connected by a magic <code>next()</code> call.</p>
+
+<p>The <code>function next() {...}</code> just iterate through <code>app.stack[]</code>. The trunk of it is like:</p>
+
+<p>```javascript
+function next() {</p>
+
+<pre><code>// get next layer from stack
+layer = stack[index++];
+// let the layer handle the request
+layer.handle(req, res, next);
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>The Core</h2>
+
+<p>Normally the layer handler should call <code>next()</code> explicitly to advance to next layer. Otherwise if the handler is not valid (checking arity) or an exception is thrown. <code>next()</code> will call itself to find an error handler.</p>
+
+<p>```javascript</p>
+
+<pre><code>  var arity = layer.handle.length;
+  if (err) {
+    if (arity === 4) {
+      layer.handle(err, req, res, next);
+    } else {
+      next(err);
+    }
+  } else if (arity &lt; 4) {
+    layer.handle(req, res, next);
+  } else {
+    next();
+  }
+</code></pre>
+
+<p>```</p>
+
+<p>In my opinion, this part is indeed the <strong>core of connect</strong>. Simple and flexible, worth reading and thinking through how the application goes under different scheme and condition.</p>
+
+<h2>Conclusion</h2>
+
+<p>Connect has some other parts such as routing and http header process. Before 3.x, it also binds many basic middlewares. But they are more like application sugar to make it easier to create a http server.</p>
+
+<p>The core of connect is not binded to http, it is applicable for all request-response model.</p>
+
+<p>This is something I'm working on recently. A connect like middleware framework for wechat: <a href="https://github.com/rogerz/wechat-bot">wechat-bot</a>.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[How to use commander.js]]></title>
+    <link href="http://rogerz.github.com/blog/2013/03/21/commander-js/"/>
+    <updated>2013-03-21T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/03/21/commander-js</id>
+    <content type="html"><![CDATA[<h1>program</h1>
+
+<p><code>program = require 'commander'</code> brings you the <code>Command</code> object. To make it work, use <code>option</code> to add options to it and <code>parse</code> to parse the args.</p>
+
+<p>```
+program</p>
+
+<pre><code>.version('0.0.1')
+.option('-C, --chdir &lt;path&gt;', 'change the working directory')
+.option('-c, --config &lt;path&gt;', 'set config path. defaults to ./deploy.conf')
+.option('-T, --no-tests', 'ignore test hook');
+</code></pre>
+
+<p>program.parse(process.argv);
+```</p>
+
+<p>After parse, you'll get the value of options as program's properties, and rest of the args in one array.</p>
+
+<p><code>cmd -C path --config conf arg1 arg2</code> results in</p>
+
+<p><code>
+program = {
+  args: ["arg1", "arg2"],
+  chdir: "path",
+  config: "conf",
+  tests: true
+  ...
+}
+</code>
+Then it is time to process these content.</p>
+
+<h1>commands</h1>
+
+<p><code>program</code> refers to the cli tool itself and you may extend some action for it just like <code>git commit</code>, <code>git push</code>. This is done by creating <code>command</code> under <code>program</code></p>
+
+<p><code>
+program
+  .command("push [remote] [branch]")
+  .option(...)
+  .option(...)
+  .action(function(remote, branch){})
+</code></p>
+
+<p>The <code>action()</code> register a callback to be invoked when <code>program.parse()</code> is called. The args applied to the callback will be the ones defined in <code>command</code>.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: component | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/component/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Developing web app client with component]]></title>
+    <link href="http://rogerz.github.com/blog/2013/11/04/component/"/>
+    <updated>2013-11-04T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/11/04/component</id>
+    <content type="html"><![CDATA[<p><a href="https://github.com/component/component">component</a> is a client package management ecosystem. It aims to resolve serveral pain points in web development.</p>
+
+<h2>Advantage</h2>
+
+<p>With component, you may</p>
+
+<ol>
+<li>include just one java-script file instead of adding required library one by one</li>
+<li>the same as css</li>
+<li>you may package js, css and html template in one component</li>
+</ol>
+
+
+<p>Nice, huh.</p>
+
+<p>With <code>bower</code>, after all dependencies installed, you shall still need to include them one by one in <code>html</code> page, like</p>
+
+<p>```</p>
+
+<script src="bower_components/es5-shim/es5-shim.js"></script>
+
+
+<script src="bower_components/json3/lib/json3.min.js"></script>
+
+
+<p>```</p>
+
+<p>And you need to maintain the list manually when a new package is installed</p>
+
+<p>With <code>component</code>, things are much nicer. All you need to do is add</p>
+
+<p>```
+<link rel="stylesheet" href="build/build.css"></p>
+
+<script src="build/build.js"></script>
+
+
+<p>```</p>
+
+<p>Rebuild the target js and css to keep it updated.</p>
+
+<h2>Background</h2>
+
+<p>component is initiated by <a href="https://github.com/visionmedia">TJ</a>. The idea is very similar to <code>npm</code>. So if you are familiar with nodejs. It should not be too difficult to understand it and use it.</p>
+
+<p>For scripts, component will define <code>require</code> function which acts the same as in <code>nodejs</code>. All the scripts included in <code>component.json</code> will be wrapped into a function which is registered to <code>require</code>.</p>
+
+<p>For styles, it is just concatenation.</p>
+
+<p>For htmls, it will convert it to a requirable javascript file. Or you may use files to include the original one but you shall need to manage the path manually.</p>
+
+<h2>Debugging</h2>
+
+<p>component build all javascript into one file, which makes it difficult to follow when debugging. Luckily it provide <code>--dev</code> option to generate script file with <code>sourceUrl</code>. You shall read lots of code like</p>
+
+<p><code>
+require.register("mbostock-d3/d3.js", Function("exports, require, module",
+"d3 = function() {\n\
+  var d3 = {\n\
+</code></p>
+
+<p>The original code is converted to a concated string! This is supposed to be parsed by the development tools. In Chrome, you may find the original files in <code>(no domain)</code> under <code>source</code> panel.</p>
+
+<h2>Auto building</h2>
+
+<p>component requires to be built before use. You may find <a href="https://github.com/anthonyshort/grunt-component-build">grunt-component-build</a> combine with <code>watch</code> very useful.</p>
+
+<p>Example settings in <code>Gruntfile.js</code></p>
+
+<pre><code>componentbuild: {
+  options: {
+    dev: true,
+    sourceUrls: true
+  },
+  components: {
+    options: {
+    },
+    src: '.',
+    dest: 'app/build'
+  }
+},
+watch: {
+  component: {
+    files: [
+      'component.json',
+      'component/{,**/}*',
+      'local/{,**/}*',
+      'Gruntfile.js'
+    ],
+    tasks: ['componentbuild']
+  }
+}
+</code></pre>
+
+<h2>Wrapping existing modules</h2>
+
+<p>component requires the script to be written in <a href="https://github.com/component/component/wiki/F.A.Q#why-commonjs-instead-of-amd">commmonjs format</a>. The <a href="https://github.com/mbostock/d3">d3.js</a> project gives an example of converting existing file to that. It is as simple as three lines.</p>
+
+<p><code>
+require("./d3");
+module.exports = d3;
+(function () { delete this.d3; })(); // unset global
+</code></p>
+
+<p>Another example is the <a href="https://github.com/brighthas/bootstrap">bootstrap as component</a> which shows how to package font files required by css. All you need is to include them as <code>files</code> in <code>component.json</code> and update the path. See <a href="https://github.com/brighthas/bootstrap/commit/71911f6c7f01555ff2e4a5140d4ff3dbea51d294">github commit</a> for details</p>
+
+<h2>Local development</h2>
+
+<p>During development, you may want to create some local component. You don't want to push it to Github because you know you will modify them from time to time before development is done. <code>component</code> provide <code>local</code> for that. See <a href="https://github.com/component/todo">todo example</a> for how to use local and also the typical folder structure for developing app with component.</p>
+
+<h2>Component with angular</h2>
+
+<p>In AngularJS, we have <code>services</code>, <code>directives</code>, <code>controllers</code> and etc. It is better to manage them by component rather than type. This will improve the reusability greatly.</p>
+
+<p>See <a href="http://www.jayway.com/2013/06/04/sharing-angularjs-modules-with-component-js">jayway's article</a> for the ideas and my ongoing work to make <a href="https://github.com/rogerz/signature-cloud/tree/master/local/control-panel-for-angular">control-panel-for-angular</a> a reusable drop-in component.</p>
+
+<p>(To be continued)</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Using javascript components with customized font]]></title>
+    <link href="http://rogerz.github.com/blog/2013/09/29/component-with-font/"/>
+    <updated>2013-09-29T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/09/29/component-with-font</id>
+    <content type="html"><![CDATA[<p>Some front-end components includes customized font. When using these modules in your project, it is important to put the font files in the right place.</p>
+
+<h2>Code never lies.</h2>
+
+<ul>
+<li><a href="https://github.com/twbs/bootstrap/blob/master/dist/css/bootstrap.css">bootstrap.css</a></li>
+</ul>
+
+
+<p>```
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('../fonts/glyphicons-halflings-regular.eot');</p>
+
+<p>src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
+}</p>
+
+<p>.glyphicon {
+  ...
+  font-family: 'Glyphicons Halflings';
+  ...
+}
+```
+It creates a new font-family and use it in class define.</p>
+
+<ul>
+<li><a href="https://github.com/videojs/video.js/blob/master/src/css/video-js.less">video-js.css</a></li>
+</ul>
+
+
+<p>```
+@font-face{
+  font-family: 'VideoJS';
+  src: url('font/vjs.eot');
+  src: url('font/vjs.eot?#iefix') format('embedded-opentype'),
+  url('font/vjs.woff') format('woff'),
+  url('font/vjs.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}</p>
+
+<p>.vjs-default-skin .vjs-slider-handle:before {
+  /<em>content: "\f111";</em>/ /<em> Circle icon = f111 </em>/
+  content: "\e009"; /<em> Square icon </em>/
+  font-family: VideoJS;
+  ...
+<code>``
+To display a character of the font, use</code>content` to specify the encoding.</p>
+
+<p>See <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face">reference on MDN</a> for details.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>The font file should be put in the path specified in <code>css</code> file or you may override it with your own <code>css</code> define.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

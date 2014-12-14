@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: angularjs | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/angularjs/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How to create AngularJS directive for jQuery input plugin]]></title>
+    <link href="http://rogerz.github.com/blog/2013/09/27/jQuery-to-angularjs/"/>
+    <updated>2013-09-27T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/09/27/jQuery-to-angularjs</id>
+    <content type="html"><![CDATA[<p>To wrap a jQuery input plugin in AngularJS directive and allow data-binding, there are essentially three steps.</p>
+
+<ol>
+<li>initialize the DOM element</li>
+<li>update the element with value in model</li>
+<li>apply the value in element to model</li>
+</ol>
+
+
+<p>Let's take <a href="http://bgrins.github.io/spectrum">spectrum</a> a jQuery colorpicker plugin for example.</p>
+
+<p>We want to use colorpicker in angularjs' way like</p>
+
+<p><code>
+&lt;input colorpicker ng-model="color" /&gt;
+</code>
+When we modify the model value, we want the colorpicker to reflect the change. And vice versa, when we pick color in color picker, we need the model value to be updated.</p>
+
+<h2>Initialization</h2>
+
+<p>In jQuery, we initialize the element by calling <code>$("#colorpicker").spectrum()</code> at the right moment. You <em>select</em> an element and attach magic things on it. That's the jQuery way.</p>
+
+<p>In AngularJS, you compile the HTML to parse the directive and link it to the model. We should put DOM manipulation in directive <code>link</code> function. Obviously we don't have to select the element because it is already in the arguments and an angular element is currently compatible with jQuery if you include jQuery in your app. So what we need to do is</p>
+
+<ol>
+<li>include jQuery in your HTML</li>
+<li>call initialization function in directive link function</li>
+</ol>
+
+
+<p>```
+link: function (scope, elem, attrs) {</p>
+
+<pre><code>elem.spectrum();
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Data binding with ng-model</h2>
+
+<p>Read the code first.</p>
+
+<p>```
+angular.module('foo').directive('colorpicker', function(){
+  return {</p>
+
+<pre><code>require: '?ngModel',
+link: function (scope, elem, attrs, ngModel) {
+  elem.spectrum();
+  if (!ngModel) return;
+  ngModel.$render = function () {
+    elem.spectrum('set', ngModel.$viewValue || '#fff');
+  };
+  elem.on('change', function () {
+    scope.$apply(function () {
+      ngModel.$setViewValue(elem.val());
+    });
+  });
+}
+</code></pre>
+
+<p>  }
+});
+```
+The key points in the code above are</p>
+
+<ol>
+<li>add dependency of <code>ng-model</code> by <code>require</code></li>
+<li>setup <code>$render</code> function to update the DOM element</li>
+<li>add event listener to update value when DOM element changes</li>
+</ol>
+
+
+<h2>More on NgModelController</h2>
+
+<p>You might be confused by <code>$viewValue</code> and <code>$setViewValue</code> at the beginning. Why model value is not mentioned here? After you read the document of <a href="http://docs.angularjs.org/api/ng.directive:ngModel.NgModelController">NgModelController</a>, you may wonder what are all these methods and properties.</p>
+
+<p>I'll try to explain the document in a more understandable way.</p>
+
+<h3>$render</h3>
+
+<blockquote><p>Called when the view needs to be updated.</p></blockquote>
+
+<p>Put a breakpoint on it and we know "when the view needs to be updated".</p>
+
+<p><code>ngModel.$render &lt;- ngModelWatch &lt;- Scope.$digest &lt;- Scope.$apply</code></p>
+
+<blockquote><p>It is expected that the user of the ng-model directive will implement this method.</p></blockquote>
+
+<p>So we implement it in our directive.</p>
+
+<h3>$setViewValue</h3>
+
+<blockquote><p>Read a value from view.</p></blockquote>
+
+<p>The first line of the document is misleading. The main purpose of this function is not read the view value but to update the model value as described in the third paragraph.</p>
+
+<blockquote><p>It internally calls all $parsers (including validators) and updates the $modelValue and the actual model path. Lastly it calls all registered change listeners.</p></blockquote>
+
+<p>And we should usually put it in DOM event handler and parse the value in the DOM as argument to this function.</p>
+
+<h3>$viewValue and $modelValue</h3>
+
+<p>If you don't push any <code>$formatters</code> or <code>$parsers</code>, the two values are actually the same. The relationship between these are as following</p>
+
+<p><code>
+$viewValue ==($parsers)==&gt; $modelValue
+$modelValue ==($formatters)==&gt; $viewValue
+</code></p>
+
+<p>An example of this will be storing date as an integer and display it in specified format.</p>
+
+<h2>Example</h2>
+
+<p>The full example can be found on <a href="http://plnkr.co/edit/RfRsWZ?p=preview">plunker</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Understanding AngularJS in unit test]]></title>
+    <link href="http://rogerz.github.com/blog/2013/09/14/angularjs-in-test/"/>
+    <updated>2013-09-14T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/09/14/angularjs-in-test</id>
+    <content type="html"><![CDATA[<p>Below is a typical unit test case for <code>directives</code> in AngularJS. In a unit test, we try to isolate the module under test from others.</p>
+
+<p>In the following example, we are testing the directive <code>sign-pad</code> which will insert a <code>canvas</code> into the DOM and attach a <code>signPad</code> to the scope. How shall we test it without a real DOM?</p>
+
+<p>```
+describe('Directives: signPad', function () {
+  var element, scope;</p>
+
+<p>  beforeEach(module('ngSignPadApp'));
+  beforeEach(module('directives/sign-pad.html'));</p>
+
+<p>  beforeEach(inject(function ($compile, $rootScope) {</p>
+
+<pre><code>element = angular.element('&lt;sign-pad&gt;&lt;/sign-pad&gt;');
+scope = $rootScope;
+$compile(element)(scope);
+scope.$digest();
+</code></pre>
+
+<p>  }));</p>
+
+<p>  it('should contain a canvas', function () {</p>
+
+<pre><code>expect(element.find('canvas').length).toBe(1);
+</code></pre>
+
+<p>  });</p>
+
+<p>  it('should bind signPad to scope', function () {</p>
+
+<pre><code>expect(scope.signPad).toBeDefined();
+</code></pre>
+
+<p>  });
+});
+```</p>
+
+<p>It actually carry out every underlying steps required in real AngularJS app. Take a look at the conceptual view.</p>
+
+<p><img src="http://docs.angularjs.org/img/guide/concepts-startup.png" alt="concept" /></p>
+
+<h2>register modules</h2>
+
+<p>First, we register the required modules for <code>inject</code> later. <code>module</code> is exported to <code>window</code> in <code>angular-mocks.js</code>.</p>
+
+<h2>inject</h2>
+
+<p>Inside <code>inject()</code>, we create $injector from the registered modules and <code>invoke</code> the anonymous function. The <code>invoke</code> will apply <code>$compile</code> and <code>$rootScope</code> service to the function.</p>
+
+<h2>compile</h2>
+
+<p>Next, we create an element using <code>angular.element</code> and compile it by <code>$compile(element)</code> then link it to the <code>scope</code> by <code>$compile(element)(scope)</code></p>
+
+<h2>digest</h2>
+
+<p>Process all the watches.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Dependency injection in AngularJS]]></title>
+    <link href="http://rogerz.github.com/blog/2013/08/27/injection-in-angular/"/>
+    <updated>2013-08-27T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/08/27/injection-in-angular</id>
+    <content type="html"><![CDATA[<p>One of the interesting feature of AngularJS is dependency injection.</p>
+
+<p>Have a look at the last example on <a href="http://docs.angularjs.org/guide/concepts">AngularJS conceptual overview</a></p>
+
+<p>```
+angular.module('timeExampleModule', []).
+  // Declare new object called time,
+  // which will be available for injection
+  factory('time', function($timeout) {</p>
+
+<pre><code>var time = {};
+
+(function tick() {
+  time.now = new Date().toString();
+  $timeout(tick, 1000);
+})();
+return time;
+</code></pre>
+
+<p>  });</p>
+
+<p>// Notice that you can simply ask for time
+// and it will be provided. No need to look for it.
+function ClockCtrl($scope, time) {
+  $scope.time = time;
+}
+```</p>
+
+<p>It worth attention that the argument name in <code>ClockCtrl</code> will be linked to the string <code>'time'</code> registered by <code>factory</code>. Or we shall say the function manufactured by <code>factory</code> under the name <code>time</code> will be injected into the function using <code>time</code> as argument name.</p>
+
+<p>We can verify this by changing <code>time</code> to <code>time1</code> and we'll see the program breaks down. But if we change the order of <code>$scope</code> and <code>time</code>, it has no affect to the program.</p>
+
+<p>Thus, the <strong>name</strong> of function argument plays an important role in AngularJS. The sequence of the argument does not matter much.</p>
+
+<p>If you have a look at the code of <a href="https://github.com/angular/angular.js/blob/master/src/auto/injector.js"><code>injector</code></a>, you may get an idea on how it works. The function declaration is converted to string using <code>.toString()</code> and the arguments are parsed and pushed into an array. The function will not be called directly but invoked by the <code>function invoke()</code>, which will then resolve the injection and apply the actual argument required.</p>
+]]></content>
+  </entry>
+  
+</feed>

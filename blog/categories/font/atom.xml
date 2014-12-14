@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: font | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/font/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using javascript components with customized font]]></title>
+    <link href="http://rogerz.github.com/blog/2013/09/29/component-with-font/"/>
+    <updated>2013-09-29T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/09/29/component-with-font</id>
+    <content type="html"><![CDATA[<p>Some front-end components includes customized font. When using these modules in your project, it is important to put the font files in the right place.</p>
+
+<h2>Code never lies.</h2>
+
+<ul>
+<li><a href="https://github.com/twbs/bootstrap/blob/master/dist/css/bootstrap.css">bootstrap.css</a></li>
+</ul>
+
+
+<p>```
+@font-face {
+  font-family: 'Glyphicons Halflings';
+  src: url('../fonts/glyphicons-halflings-regular.eot');</p>
+
+<p>src: url('../fonts/glyphicons-halflings-regular.eot?#iefix') format('embedded-opentype'), url('../fonts/glyphicons-halflings-regular.woff') format('woff'), url('../fonts/glyphicons-halflings-regular.ttf') format('truetype'), url('../fonts/glyphicons-halflings-regular.svg#glyphicons-halflingsregular') format('svg');
+}</p>
+
+<p>.glyphicon {
+  ...
+  font-family: 'Glyphicons Halflings';
+  ...
+}
+```
+It creates a new font-family and use it in class define.</p>
+
+<ul>
+<li><a href="https://github.com/videojs/video.js/blob/master/src/css/video-js.less">video-js.css</a></li>
+</ul>
+
+
+<p>```
+@font-face{
+  font-family: 'VideoJS';
+  src: url('font/vjs.eot');
+  src: url('font/vjs.eot?#iefix') format('embedded-opentype'),
+  url('font/vjs.woff') format('woff'),
+  url('font/vjs.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}</p>
+
+<p>.vjs-default-skin .vjs-slider-handle:before {
+  /<em>content: "\f111";</em>/ /<em> Circle icon = f111 </em>/
+  content: "\e009"; /<em> Square icon </em>/
+  font-family: VideoJS;
+  ...
+<code>``
+To display a character of the font, use</code>content` to specify the encoding.</p>
+
+<p>See <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/@font-face">reference on MDN</a> for details.</p>
+
+<h2>Summary</h2>
+
+<ul>
+<li>The font file should be put in the path specified in <code>css</code> file or you may override it with your own <code>css</code> define.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

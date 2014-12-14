@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: tcl | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/tcl/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[tcl learning notes]]></title>
+    <link href="http://rogerz.github.com/blog/2013/04/08/tcl-note/"/>
+    <updated>2013-04-08T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/04/08/tcl-note</id>
+    <content type="html"><![CDATA[<p>In order to customize <a href="http://sourcenav.berlios.de/" title="source navigator NG project">source navigator NG</a>, I have to push myself to learn a new language <a href="http://www.tcl.tk/man/tcl/tutorial/tcltutorial.html" title="Tcl turtorial">Tcl</a>.</p>
+
+<p>The most interesting thing I've learned in the first day is the substitution.</p>
+
+<ul>
+<li><strong>dollar sign $</strong> will substitute a variable name with its value</li>
+<li><strong>square braces []</strong> will substitute the content with the return value of the enclosed command.
+Note that <em>puts</em> returns an empty result instead of its output. <em>set</em> will return the assigned value. It is probably what you need for testing this feature</li>
+<li><strong>quotes ""</strong> will trigger the evaluation of every $ and [] inside it. The result is like a constant. It keeps the value of the first time it is evaluated. Special attention should be paid when it is used in loop condition</li>
+<li><strong>braces {}</strong> will prevent $ and [] substitution until it is evaluated by <em>expr</em> or <em>if</em>/<em>while</em>/... context</li>
+</ul>
+
+
+<p>However, the braces seems have other usage such as enclosing a group of command just like the C language, using in the <em>for</em> loop. This really disappointed me. I once thought there could be a unique explanation. But I failed to figure it out.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[tcl learning notes - array]]></title>
+    <link href="http://rogerz.github.com/blog/2013/04/08/tcl-array/"/>
+    <updated>2013-04-08T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/04/08/tcl-array</id>
+    <content type="html"><![CDATA[<p>The <strong>array</strong> in tcl is so special that it may look odd at first. When we say array in tcl, it is the associative array not the general speaking C array which in tcl has the name <strong>list</strong> instead.</p>
+
+<p>Parentheses are used for the index of array. For example:</p>
+
+<pre><code>set myarray(name) "array name"
+puts "name of myarray is $myarray(name)"
+</code></pre>
+
+<p>This is nothing special. But the fact that <em>array is just a collection of variable and does not have a value</em> is not easy to understand. It is not the same concept as the pointer in C language. When you pass an array to a tcl command i.e. proc or function, whatever the name is, you have to use a special way to get "its value", more precisely the values of the variables in the array.</p>
+
+<pre><code>proc print12 {array} {
+   upvar $array a
+   puts "$a(1), $a(2)"
+}
+</code></pre>
+
+<p>Here, <strong>upvar</strong> creates a local alias for the upper level name.</p>
+
+<p>So array in tcl is more like a quick naming scope. You get a variable "name" inside "myarray" in the previous example.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: misc | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/misc/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Cheap VPN solution]]></title>
+    <link href="http://rogerz.github.com/blog/2014/12/14/cheap-vpn-solution/"/>
+    <updated>2014-12-14T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2014/12/14/cheap-vpn-solution</id>
+    <content type="html"><![CDATA[<p>I was using some VPN services to access the blocked sites in China before. It cost 180 CNY per year. It provide multiple lines and detail instructions for how to use it. Easy and stable for beginners. If you take my ref link http://refyunti.com/?r=0e6802542f99958e , you will get 10 CNY discount.</p>
+
+<p>Recently I found another solution. It is not as easy as a ready-to-use VPN server, but much cheaper and not to difficult to setup</p>
+
+<h2>A cheap VPS on bandwagon</h2>
+
+<p><code>
+Micro-64
+Self-managed
+HDD: 1.5 GB
+RAM: 64 MB
+CPU: 1x Intel Xeon
+BW: 100 GB/mo
+$3.99 USD Annually
+</code></p>
+
+<p>It comes with a pre-installed OS and one-click install for OpenVPN. In spite of very limited RAM, it is good enough for a personal VPN server.</p>
+
+<h2>A smart router supports SSH tunnel plugin</h2>
+
+<p>I bought a <a href="http://www.hiwifi.com">HiWiFi</a> router and installed <a href="https://app.hiwifi.com/store.php?m=plugins&amp;a=info&amp;rid=564371&amp;sid=19">SSH tunnel</a>. The good thing is that it handles routes smartly so that only the blocked sites are accessed through the tunnel. When you access sites hosted in China, it uses direct link.</p>
+
+<p>To use the SSH tunnel, you may want to create a new user on the VPS</p>
+
+<p>```shell</p>
+
+<h1>useradd rogerz</h1>
+
+<h1>passwd rogerz</h1>
+
+<p>```</p>
+
+<p>With such a smart router, all devices at home can access the internet smoothly. No additional setup required.</p>
+
+<h2>OpenVPN Clients</h2>
+
+<p>When I am not at home, OpenVPN will be the solution. It is easy to install OpenVPN server on bandwagon VPS. Just go to the KiWiVM control panel and click the button. Everything will be ready for you.</p>
+
+<h3>iOS devices</h3>
+
+<ol>
+<li>Install the <a href="https://itunes.apple.com/us/app/openvpn-connect/id590379981?mt=8">OpenVPN Connect</a> app</li>
+<li>Download the OpenVPN profile and related keys from KiWiVM control panel</li>
+<li>Copy all the files to iPhone via iTunes</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Remap English Keyboard to ISO]]></title>
+    <link href="http://rogerz.github.com/blog/2014/06/29/remap-english-keyboard-to-iso/"/>
+    <updated>2014-06-29T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2014/06/29/remap-english-keyboard-to-iso</id>
+    <content type="html"><![CDATA[<p>Life is much nicer by remapping the keyboard with <a href="http://pqrs.org/macosx/keyremap4macbook/">KeyRemap4MacBook</a></p>
+
+<ul>
+<li>For International English Keyboard and ISO Keyboard Users
+
+<ul>
+<li>Improve ISO Keyboard Layout ('\' to additional Enter, '§' to '<code>' and '</code>' to '\')</li>
+</ul>
+</li>
+</ul>
+
+
+<p>See also <a href="http://lifehacker.com/5882684/the-best-keyboard-remapper-for-mac-os-x">Review on LifeHacker</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Maxiang - markdown editor for evernote]]></title>
+    <link href="http://rogerz.github.com/blog/2013/12/27/maxiang-markdown-editor-for-evernote/"/>
+    <updated>2013-12-27T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/12/27/maxiang-markdown-editor-for-evernote</id>
+    <content type="html"><![CDATA[<p><a href="http://maxiang.info/">maxiang</a> is a wonderful editor for evernote, especially for people who loves markdown writing.</p>
+
+<p>At the beginning, I was wondering how it stores the original markdown text for futher editing. The author replied my mail and give me the answer. It turns out a very simple solution. <strong>The original markdown text is stored in a hidden element in the notes</strong>.</p>
+
+<p>Export the notes and edit the HTML. At the end of the document, there is a hidden div.</p>
+
+<p>```html</p>
+
+<center style="display:none">@%28Fusion%20C4C%29%5BLHMI%5D%0A%0A%23%20Inside%20and%20out%20Chinese%20disp
+```
+
+That's it.
+
+This also implies that you should not edit the note created by maxiang in evernote directly because it is a one direction conversion.
+
+The missing link to the [project page on Github](https://github.com/gockxml/dillinger)
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[hello world]]></title>
+    <link href="http://rogerz.github.com/blog/2013/02/21/hello-world/"/>
+    <updated>2013-02-21T21:21:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/02/21/hello-world</id>
+    <content type="html"><![CDATA[<p>Hello world!</p>
+
+<p>from localhost</p>
+]]></content>
+  </entry>
+  
+</feed>

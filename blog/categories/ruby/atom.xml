@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ruby | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/ruby/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Inside 'Hello world' of Sinatra]]></title>
+    <link href="http://rogerz.github.com/blog/2013/04/06/hello-sinatra/"/>
+    <updated>2013-04-06T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/04/06/hello-sinatra</id>
+    <content type="html"><![CDATA[<p><a href="http://www.sinatrarb.com/intro.html">sinatra</a> is claimed to be a DSL for creating web application. So how is this <strong>DSL</strong> made up. Let's dive into the hello world example and see.</p>
+
+<h1>General</h1>
+
+<p>```</p>
+
+<h1>myapp.rb</h1>
+
+<p>require 'sinatra'</p>
+
+<p>get '/' do
+  'Hello world!'
+end
+```</p>
+
+<p>After requiring <code>sinatra</code>, a new method <code>get</code> is available for the <code>main</code> Object.</p>
+
+<h1>Inside</h1>
+
+<h2>require</h2>
+
+<p><code>sinatra.rb</code> does nothing but requires some other files. <code>require</code> will execute all the statement in the target file.</p>
+
+<p>```</p>
+
+<h1>sinatra.rb</h1>
+
+<p>require 'sinatra/base'
+require 'sinatra/main'
+```</p>
+
+<h2>extend</h2>
+
+<p>It is in the <code>main.rb</code> that extends the method from Sinatra::Delegator</p>
+
+<p>```</p>
+
+<h1>sinatra/main.rb</h1>
+
+<p>extend Sinatra::Delegator
+```</p>
+
+<p>For the difference between <code>extend</code> and <code>include</code>, here is a good <a href="http://rubyquicktips.com/post/1133877859/include-vs-extend">explanation</a></p>
+
+<blockquote><p>include makes the module’s methods available to the instance of a class, while
+extend makes these methods available to the class itself.</p></blockquote>
+
+<h2>define_method</h2>
+
+<p>It is in <code>base.rb</code> where <code>Sinatra::Delegator</code> is defined</p>
+
+<p>```</p>
+
+<h1>sinatra/base.rb</h1>
+
+<p>module Sinatra</p>
+
+<pre><code>module Delegator
+    def self.delegate(*methods)
+        methods.each do |method_name|
+            define_method(method_name) do |*args, &amp;block|
+                return super(*args, &amp;block) if respond_to? method_name
+                Delegator.target.send(method_name, *args, &amp;block)
+                ...
+            end
+        end
+    end
+
+    delegate :get,:patch
+
+    class &lt;&lt; self
+        attr_accessor :target
+    end
+
+​    self.target = Application
+end
+</code></pre>
+
+<p>end
+```</p>
+
+<h1>Outline</h1>
+
+<p>The original code looks a bit complicated. In short, it could be</p>
+
+<p>```</p>
+
+<h1>methods.rb</h1>
+
+<p>module Methods</p>
+
+<pre><code>define_method(:get) do |*args, &amp;block|
+    puts "get is called"
+end
+</code></pre>
+
+<p>end</p>
+
+<p>extend Methods
+```</p>
+
+<p>```
+require 'methods'</p>
+
+<p>get '/' do
+  "hello, world"
+end
+```</p>
+]]></content>
+  </entry>
+  
+</feed>

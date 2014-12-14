@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: javascript | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/javascript/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How does generator behave]]></title>
+    <link href="http://rogerz.github.com/blog/2013/11/16/generator/"/>
+    <updated>2013-11-16T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/11/16/generator</id>
+    <content type="html"><![CDATA[<p>Generator is something new in ES6. It is quite interesting to explore how it behaves.</p>
+
+<h2>Example</h2>
+
+<p>Here is a simple example</p>
+
+<p>```javascript
+/<em> jshint esnext:true </em>/</p>
+
+<p>var g = function* () {
+  var a = yield 1;
+  console.log(a);
+  var b = yield 2;
+  console.log(b);
+  var c = yield 3;
+  console.log(c);
+};</p>
+
+<p>var iterator = g();
+var x = iterator.next('x');
+console.log(x);
+var y = iterator.next('y', 'dummy');
+console.log(y);
+var z = iterator.next('z');
+console.log(z);
+var _ = iterator.next('<em>');
+console.log(</em>);
+```</p>
+
+<h2>Result</h2>
+
+<p>This script requires nodejs v0.11 with <code>--harmony-generators</code></p>
+
+<p><code>bash
+$ nvm use 0.11
+Now using node v0.11.8
+$ node --harmony-generators index.js
+{ value: 1, done: false }
+y
+{ value: 2, done: false }
+z
+{ value: 3, done: false }
+_
+{ value: undefined, done: true }
+</code></p>
+
+<p>Let's try to understand how this comes out.</p>
+
+<h2>What happened</h2>
+
+<ol>
+<li><code>function*</code> defines a generator. Calling the generator will create a new iterator.</li>
+<li><code>iterator.next()</code> will run the body of generator until next <code>yield</code> or end of generator and gets the yielded value as <code>{value: 'yielded value', done: false}</code>.</li>
+<li>the generator is magically paused at <code>yield</code> until <code>iterator.next()</code> is called again, when it gets the return value from the <strong>new</strong> <code>iterator.next(value)</code> and continues execution.</li>
+<li>if <code>iterator.next()</code> does not meet a yield but the function end, it gets the result <code>{value: undefined, done: true}</code>.</li>
+</ol>
+
+
+<h2>Try to understand</h2>
+
+<p>The most magic part is in <code>yield</code>. The execution of <code>var a = yield 1</code> is splitted into two steps;</p>
+
+<ol>
+<li>The first call <code>iterator.next('x')</code> will execute <code>yield 1</code> and gets the value <code>1</code> from it. But at this moment, <code>a</code> is not assigned any value yet. The argument of first <code>next()</code> call seems to be dummy. You could not catch <code>x</code> in generator as in the example above.</li>
+<li>The second call <code>iterator.next('y')</code> will complete the execution of <code>yield 1</code>. The argument <code>'y'</code> becomes the return value of <code>yield 1</code>, thus <code>a</code> is assigned value <code>'y'</code></li>
+</ol>
+
+
+<p>Finally, <code>iterator.next('y')</code> will get value from next yield, i.e. <code>yield 2</code>.</p>
+
+<h2>Summary</h2>
+
+<h3>excution sequence</h3>
+
+<p>iterator.next() => generator until yield or end => iterator.next() => generator until next yield or end</p>
+
+<h3>value pass</h3>
+
+<ol>
+<li><code>iterator.next()</code> gets the yielded value in <code>yield value</code></li>
+<li><code>yield</code> gets value from <strong>next</strong> <code>next(value)</code></li>
+</ol>
+
+
+<h2>Reference</h2>
+
+<ol>
+<li><a href="http://code.shutterstock.com/presentations/node+harmony/">node+harmony</a>: nice presentation explaining the execution sequence well</li>
+<li><a href="http://wingolog.org/archives/2013/05/08/generators-in-v8">generators in v8</a>: example of using generator for async calls</li>
+</ol>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[JIT compiler in windjs]]></title>
+    <link href="http://rogerz.github.com/blog/2013/08/18/windjs-compiler/"/>
+    <updated>2013-08-18T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/08/18/windjs-compiler</id>
+    <content type="html"><![CDATA[<p>javascript是一个神奇的语言，在“简单”的语法规则背后可以作出许多匪夷所思的事情，例如<a href="windjs.org">windjs</a>中的compile，某种程度上实现了在运行时对函数进行重新编译，甚至重载了javascript最基本的关键字<code>if</code>, <code>for</code>等。</p>
+
+<p>且看一个延时输出fibonacci数列的例子</p>
+
+<pre><code>var fibo = eval(Wind.compile('async', function(){
+    var a = 1, b = 1;
+    console.log(a);
+    $await(Wind.Async.sleep(1000));
+    console.log(b);
+    while (true){
+        $await(Wind.Async.sleep(1000));
+        var c = a + b;
+        console.log(c);
+        a = b;
+        b = c;
+    }   
+}));
+</code></pre>
+
+<p>这段代码想要表达的就是忽略掉中间那堆<code>eval(Wind.compile('async', ...))</code>之后的内容，即定义一个函数。</p>
+
+<pre><code>var fibo = function(n) {
+    ...
+}
+</code></pre>
+
+<p>由于这个函数体内需要用到一些异步返回的操作<code>sleep()</code>，没有被javascript直接支持，作者想到的办法是重新用<code>async</code>编译这个函数。阅读windjs的代码，可以知道这个compiler实现的基本步骤是。</p>
+
+<ol>
+<li>把函数转为string</li>
+<li>用自己编写的解析器将这个string翻译为string形式的新的函数代码</li>
+<li>用eval的方式执行翻译后函数代码，生成异步执行的任务对象</li>
+</ol>
+
+
+<p>```
+// Compiled:
+/<em> async &lt;&lt; function () { </em>/     (function () {</p>
+
+<pre><code>                                 var _builder_$0 = Wind.builders["async"];
+                                 return _builder_$0.Start(this,
+                                     _builder_$0.Delay(function () {
+</code></pre>
+
+<p>/<em>     var a = 1, b = 1; </em>/                  var a = 1, b = 1;
+/<em>     console.log(a); </em>/                    console.log(a);
+/<em>     $await(Wind.Async.sleep(1000)); </em>/    return <em>builder</em>$0.Bind(Wind.Async.sleep(1000), function () {
+/<em>     console.log(b); </em>/                        console.log(b);</p>
+
+<pre><code>                                             return _builder_$0.While(function () {
+</code></pre>
+
+<p>/<em>     while (true) { </em>/                             return true;</p>
+
+<pre><code>                                             },
+                                                 _builder_$0.Delay(function () {
+</code></pre>
+
+<p>/<em>         $await(Wind.Async.sleep(1000)); </em>/            return <em>builder</em>$0.Bind(Wind.Async.sleep(1000), function () {
+/<em>         var c = a + b; </em>/                                 var c = a + b;
+/<em>         console.log(c); </em>/                                console.log(c);
+/<em>         a = b; </em>/                                         a = b;
+/<em>         b = c; </em>/                                         b = c;</p>
+
+<pre><code>                                                         return _builder_$0.Normal();
+                                                     });
+                                                 })
+</code></pre>
+
+<p>/<em>     } </em>/                                      );</p>
+
+<pre><code>                                         });
+                                     })
+                                 );
+</code></pre>
+
+<p>/<em> } </em>/                          })
+//@ sourceURL=wind/0_anonymous.js
+```</p>
+
+<p>比较原始代码和翻译后的代码，可以看出他们的可执行部分是一模一样的，有区别的部分是<code>flow control</code>的关键词<code>while</code>和特殊指令<code>$await</code>，并且函数的执行被包装到<code>async</code>这个<code>builder</code>中。</p>
+
+<p>我们暂时不去深入<code>windjs</code>如何通过这种方式实现异步执行，从上面的基本分析中我们可以推断，<code>windjs</code>可以并且只能编译一个语法合理的javascript函数，它并不能扩展javascript的关键字，只能以伪函数的方式实现。例如你是找不到一个叫<code>$await</code>的函数的定义的。其次，虽然这个函数的语法是遵从javascript的，但其行为却不保证相同，因为<code>windjs</code>内部对<code>if</code>, <code>while</code>这些做了重新解释，还未确知是否对某些形式的表达式会有兼容性问题。</p>
+
+<p>推荐阅读：<a href="http://windjs.org/cn/blog/2012/07/infoq-interview-windjs-author-1/">专访Wind.js作者老赵（上）</a>。</p>
+]]></content>
+  </entry>
+  
+</feed>

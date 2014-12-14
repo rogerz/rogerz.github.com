@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: embedded | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/embedded/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[select() in lwip]]></title>
+    <link href="http://rogerz.github.com/blog/2013/04/05/lwip-select/"/>
+    <updated>2013-04-05T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/04/05/lwip-select</id>
+    <content type="html"><![CDATA[<p><a href="http://savannah.nongnu.org/projects/lwip/">lwip</a> has its own select() implementation named <code>lwip_select()</code>. There are two key points in the implementation of select().</p>
+
+<p>First, the file descriptor needs to provide an interface to check the readiness of reading or writing.</p>
+
+<p>In lwip socket, it is implemented in <code>lwip_selscan()</code> which will check the data and event binding to a socket.</p>
+
+<pre><code>if (sock != NULL) {
+  lastdata = sock-&gt;lastdata;
+  rcvevent = sock-&gt;rcvevent;
+  sendevent = sock-&gt;sendevent;
+  errevent = sock-&gt;errevent;
+}
+</code></pre>
+
+<p>Second, the select() function should provide a mechanism to suspend current thread and wake it up when it is ready for read or write.</p>
+
+<p>lwip uses a global list <code>select_cb_list</code> to hold all the thread pending on <code>select()</code>.</p>
+
+<pre><code>/* Put this select_cb on top of list */
+select_cb.next = select_cb_list;
+if (select_cb_list != NULL) {
+  select_cb_list-&gt;prev = &amp;select_cb;
+}
+select_cb_list = &amp;select_cb;
+/* Increasing this counter tells even_callback that the list has changed. */
+select_cb_ctr++;
+</code></pre>
+
+<p>Here <code>select_cb</code> is a local struct in <code>select()</code>, which stores the readset, writeset and exceptset passed by <code>select()</code>. A semaphore is created to let the thread wait on and be waken up later.</p>
+
+<pre><code>  waitres = sys_arch_sem_wait(&amp;select_cb.sem, msectimeout);
+</code></pre>
+
+<p>Then how do we wake the threads up? It is inside <code>event_callback()</code> which is triggered whenever there is something new on socket. It traverse the <code>select_cb_list</code> and wake the corresponding threads up by signal the semaphore.</p>
+
+<pre><code>while (1) {
+    sys_sem_wait(selectsem);
+    for (scb = select_cb_list; scb; scb = scb-&gt;next) {
+        if (scb-&gt;sem_signalled == 0) {
+        /* Test this select call for our socket */
+        if (scb-&gt;readset &amp;&amp; FD_ISSET(s, scb-&gt;readset))
+            if (sock-&gt;rcvevent &gt; 0)
+                break;
+        if (scb-&gt;writeset &amp;&amp; FD_ISSET(s, scb-&gt;writeset))
+            if (sock-&gt;sendevent)
+                break;
+        }
+    }
+    if (scb) {
+        scb-&gt;sem_signalled = 1;
+        sys_sem_signal(scb-&gt;sem);
+        sys_sem_signal(selectsem);
+    } else {
+        sys_sem_signal(selectsem);
+        break;
+    }
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Implementation example of read write lock]]></title>
+    <link href="http://rogerz.github.com/blog/2013/03/28/rd-wr-lock/"/>
+    <updated>2013-03-28T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/03/28/rd-wr-lock</id>
+    <content type="html"><![CDATA[<p>Read write lock is used to <strong>share</strong> reading access to resources while locking it for <strong>exclusive</strong> writing access. Here are two implementation described by pseudo code.</p>
+
+<h1>A simple implementation</h1>
+
+<p><code>
+init
+  create sem(max readers)
+  create mutex
+lock read ()
+  take sem
+unlock read
+  put sem
+lock write
+  get mutex
+  get sem for max readers times
+unlock write
+  put sem for max readers times
+  put mutex
+</code></p>
+
+<p>There is a limit on maximum readers and it is not very efficient when locking and unlocking write.</p>
+
+<h1>Another implementaion</h1>
+
+<p>From <a href="https://github.com/RT-Thread/rt-thread/blob/master/components/pthreads/pthread_rwlock.c">pthreads</a> component in RT-Thread</p>
+
+<p>```
+wrlock
+  if ref_count ！= 0  // locked by rd or wr</p>
+
+<pre><code>wait in condwriters
+</code></pre>
+
+<p>  ref_count = -1</p>
+
+<p>rdlock
+  if ref_count = -1 // locked by wr</p>
+
+<pre><code>wait in condreaders
+</code></pre>
+
+<p>  ref_count++</p>
+
+<p>unlock // for both wrlock and rdlock
+  if ref_count > 0</p>
+
+<pre><code>ref_count--  // release reader
+</code></pre>
+
+<p>  if ref_count = -1</p>
+
+<pre><code>ref_count = 0 // release writer
+</code></pre>
+
+<p>  if writers > 0</p>
+
+<pre><code>if ref_count == 0 // no more readers
+  signal next writer
+</code></pre>
+
+<p>  else</p>
+
+<pre><code>if readers &gt; 0  // no more writers
+    broadcast readers
+</code></pre>
+
+<p>```</p>
+
+<p>If you are reading the real code, be careful not being mislead by the <code>rw_mutex</code>. It is used to protect the access to <code>rw_lock</code> object itself not the target resource.</p>
+
+<p>For the real resource, it checks the <code>ref_count</code> for access permission. <code>ref_count</code> is 0 if the resource is free, -1 if locked by at least one writer, positive if shared by several readers.</p>
+
+<p><code>condwriters</code> and <code>condreaders</code> are actually <code>semaphore</code>, "signal writer" is actually putting the <code>semaphore</code>. "broadcast readers" is quite tricky. It <strong>tries</strong> to take the <code>semaphore</code> and then release it <strong>no matter</strong> you got it or not. Stop the try once you get it successfully. Suppose there are some threads waiting on the <code>semaphore</code>. It works as following.</p>
+
+<p><code>
+try take sem and fail
+release sem and wake up one thread
+try take sem and fails
+release sem and wake next thread
+try take sem and fails
+release sem but no thread to wake
+try take sem and success
+stop
+</code></p>
+]]></content>
+  </entry>
+  
+</feed>

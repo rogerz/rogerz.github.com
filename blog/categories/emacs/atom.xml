@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: emacs | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/emacs/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Using emacs as nodejs develop enviroment]]></title>
+    <link href="http://rogerz.github.com/blog/2013/07/07/emacs-24-javascript/"/>
+    <updated>2013-07-07T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/07/07/emacs-24-javascript</id>
+    <content type="html"><![CDATA[<p>There was a nice <a href="http://blog.deadpansincerity.com/2011/05/setting-up-emacs-as-a-javascript-editing-environment-for-fun-and-profit/">article</a> talking about using Emacs as javascript editing environment. Thanks to the support of <a href="http://www.emacswiki.org/emacs/ELPA">packages in Emacs 24</a>, it is now much easier to config it. And there are also many new packages available to improve the environment.</p>
+
+<h1>General steps</h1>
+
+<ol>
+<li>Install <a href="http://melpa.milkbox.net/#installing">melpa</a></li>
+<li>Install packages using <code>M-x list-packages</code> or <code>M-x package-install</code></li>
+<li>Add init command</li>
+</ol>
+
+
+<h2>Recommended packages</h2>
+
+<ul>
+<li><a href="https://github.com/emacs-helm/helm">helm</a>, replacement of <code>anything</code></li>
+<li><a href="http://auto-complete.org/">auto-complete</a></li>
+<li><a href="https://github.com/yasuyk/ac-helm">ac-helm</a></li>
+<li><a href="https://github.com/thomblake/js3-mode">js3-mode</a></li>
+<li><a href="http://ethanschoonover.com/solarized">solarized-theme</a></li>
+</ul>
+
+
+<h2>Init command</h2>
+
+<p>Add a hook in <code>init.el</code></p>
+
+<pre><code>(add-hook 'after-init-hook (lambda () (load "~/.emacs.d/after-init.el")))
+</code></pre>
+
+<p>And call real init in <code>after-init.el</code></p>
+
+<pre><code>; color theme
+(load-theme 'solarized-dark t)
+
+; helm
+(helm-mode 1)
+
+; auto-complete
+(require 'auto-complete-config)
+(ac-config-default)
+
+; ac-helm
+(ac-complete-with-helm)
+
+; pair mode
+(show-paren-mode)
+(electric-pair-mode)
+</code></pre>
+
+<p>We can't call these command directly in <code>init.el</code> because packages are loaded and initialized after <code>init.el</code>, but before <code>after-init-hook</code>.</p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: guide | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/guide/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Octopress+Prose+Github+Travis CI = coders' blog]]></title>
+    <link href="http://rogerz.github.com/blog/2013/02/21/prose-io-github-travis-ci/"/>
+    <updated>2013-02-21T23:40:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/02/21/prose-io-github-travis-ci</id>
+    <content type="html"><![CDATA[<h1>Introduction</h1>
+
+<p>This is powered by the following project or services</p>
+
+<ul>
+<li><a href="http://octopress.org">Octopress</a>: blogging framework</li>
+<li><a href="http://pages.github.com/">Github pages</a>: site hosting</li>
+<li><a href="http://travis-ci.org">Travis CI</a>: site generating</li>
+<li><a href="http://prose.io">Prose</a>: content editor</li>
+</ul>
+
+
+<h1>How to</h1>
+
+<h2>Step 1 - deploy Octopress on Github</h2>
+
+<p>This is not difficult, just follow the steps on <a href="http://octopress.org/docs/">Octopress Document</a>.</p>
+
+<h2>Step 2 - add configuration for Prose</h2>
+
+<p>Just add the following content to <code>_config.yml</code>. This file is used both by Octopress and Prose.</p>
+
+<p>```yaml</p>
+
+<h1>prose.io settings</h1>
+
+<p>prose:
+  rooturl: "source"
+  metadata:</p>
+
+<pre><code>"source/_posts":
+  - name: "layout"
+    field:
+      element: "hidden"
+      value: "post"
+  - name: "title"
+    field:
+      element: "text"
+      value: "Title"
+  - name: "comments"
+    field:
+      label: "Allow comments"
+      element: "checkbox"
+      value: true
+  - name: "categories"
+    field:
+      element: "text"
+      value: "misc"
+  - name: "published"
+    field:
+      label: "Published"
+      element: "checkbox"
+      value: true
+</code></pre>
+
+<p>```</p>
+
+<p>Refer to <a href="https://github.com/prose/prose/wiki/Prose-Configuration">Prose wiki</a> for details</p>
+
+<h2>Step 3 - create a Github OAuth token for Travis CI</h2>
+
+<p>This provide a relative secure way to push content to your Github repository from Travis CI.</p>
+
+<p>```bash</p>
+
+<pre><code>curl -u 'rogerz' -d '{"scopes":["public_repo"], "note":"Travis access"}' https://api.github.com/authorizations
+
+Enter host password for user 'rogerz':
+
+{
+  "id": 1695515,
+  "url": "https://api.github.com/authorizations/1695515",
+  "app": {
+    "name": "Travis access (API)",
+    "url": "http://developer.github.com/v3/oauth/#oauth-authorizations-api"
+  },
+  "token": "dfb6d666b6535cf19df9398273d4beb854b61345",
+  "note": "Travis access",
+  "note_url": null,
+  "created_at": "2013-02-20T12:03:28Z",
+  "updated_at": "2013-02-20T12:03:28Z",
+  "scopes": [
+    "public_repo"
+  ]
+}
+</code></pre>
+
+<p>```</p>
+
+<p>More details on <a href="https://github.com/blog/1270-easier-builds-and-deployments-using-git-over-https-and-oauth">Github blog</a>.</p>
+
+<h2>Step 4 - add configuration for Travis CI</h2>
+
+<p>Encrypt your Github token</p>
+
+<pre><code>travis encrypt GH_TOKEN=your_token
+</code></pre>
+
+<p>and add it to <code>.travis.yml</code></p>
+
+<p>```yaml</p>
+
+<pre><code>---
+branches:
+  only:
+  - source
+language: ruby
+rvm:
+- 1.9.3
+before_script:
+- export REPO_URL="https://$GH_TOKEN@github.com/$GH_REPO.git"
+- rake setup_github_pages[$REPO_URL]
+script:
+- rake generate
+after_script:
+- rake deploy
+env:
+  global:
+  - GH_REPO="rogerz/rogerz.github.com"
+  - secure: "V+j9SSuxyhwN5fB3b6Xj7WZ6kuuaSgCTHaiHHfGtPfwSCBZtxmaLrUdbuOEG\nKKpk0UX5nJoqEM0nmgAT1I5KKI2vkx4TX+mHnNQ0rUInipXTf7C9z/42OxKM\nrY5wgcD0G8ChccFAzJNYqFEXXkmiaYDWxjwlslA8pOZKSmHH8z4="
+</code></pre>
+
+<p>```</p>
+
+<p>More on <a href="http://about.travis-ci.org/docs/user/build-configuration/#Secure-environment-variables">Travis CI help</a></p>
+
+<h2>Step 5 - customize the <code>Rakefile</code></h2>
+
+<p>Hide Github token during <code>rake</code></p>
+
+<p>```diff</p>
+
+<pre><code>-      puts "Added remote #{repo_url} as origin"
++      puts "Added remote as origin" # don't put repo_url in travis-ci as it may contains token
+
+-    system "git push origin #{deploy_branch} --force"
++    system "git push origin #{deploy_branch} --force --quiet" # hide github token
+</code></pre>
+
+<p>```</p>
+
+<p>Modify regex to parse url of HTTPS</p>
+
+<p>```diff</p>
+
+<pre><code>-    puts "(For example, 'git@github.com:your_username/your_username.github.com)"
++    puts "(For example, 'git@github.com:your_username/your_username.github.com' or 'https://github.com/your_username/your_username.github.com')"
+
+-  user = repo_url.match(/:([^\/]+)/)[1]
++  user = repo_url.match(/[\/:]([^\/]+)\/[^\/]+$/)[1]
+</code></pre>
+
+<p>```</p>
+
+<p>Skip unnecessary building in Travis CI (<a href="http://about.travis-ci.org/docs/user/how-to-skip-a-build/">More</a>).</p>
+
+<p>```diff</p>
+
+<pre><code>-    message = "Site updated at #{Time.now.utc}"
++    message = "Site updated at #{Time.now.utc}\n\n[ci skip]"
+
+-    system "git commit -m \"Octopress init\""
++    system "git commit -m \"Octopress init\n\n[ci skip]\""
+</code></pre>
+
+<p>```</p>
+
+<h2>Step 6 - turn on Travis CI and push</h2>
+
+<p>Check <a href="https://github.com/rogerz/rogerz.github.com/commit/49e2c9c4b20748300a2db67a7b23a8a584cad86e">my commit</a> for all modification required. Turn on Travis CI service hook and push the changes to <code>source</code> branch. You are ready to post in <a href="http://prose.io">Prose</a> now.</p>
+]]></content>
+  </entry>
+  
+</feed>

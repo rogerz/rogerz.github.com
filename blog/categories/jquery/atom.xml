@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: jQuery | Human, not octopus]]></title>
+  <link href="http://rogerz.github.com/blog/categories/jquery/atom.xml" rel="self"/>
+  <link href="http://rogerz.github.com/"/>
+  <updated>2014-12-14T06:58:14+00:00</updated>
+  <id>http://rogerz.github.com/</id>
+  <author>
+    <name><![CDATA[Rogerz Zhang]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[How to create AngularJS directive for jQuery input plugin]]></title>
+    <link href="http://rogerz.github.com/blog/2013/09/27/jQuery-to-angularjs/"/>
+    <updated>2013-09-27T00:00:00+00:00</updated>
+    <id>http://rogerz.github.com/blog/2013/09/27/jQuery-to-angularjs</id>
+    <content type="html"><![CDATA[<p>To wrap a jQuery input plugin in AngularJS directive and allow data-binding, there are essentially three steps.</p>
+
+<ol>
+<li>initialize the DOM element</li>
+<li>update the element with value in model</li>
+<li>apply the value in element to model</li>
+</ol>
+
+
+<p>Let's take <a href="http://bgrins.github.io/spectrum">spectrum</a> a jQuery colorpicker plugin for example.</p>
+
+<p>We want to use colorpicker in angularjs' way like</p>
+
+<p><code>
+&lt;input colorpicker ng-model="color" /&gt;
+</code>
+When we modify the model value, we want the colorpicker to reflect the change. And vice versa, when we pick color in color picker, we need the model value to be updated.</p>
+
+<h2>Initialization</h2>
+
+<p>In jQuery, we initialize the element by calling <code>$("#colorpicker").spectrum()</code> at the right moment. You <em>select</em> an element and attach magic things on it. That's the jQuery way.</p>
+
+<p>In AngularJS, you compile the HTML to parse the directive and link it to the model. We should put DOM manipulation in directive <code>link</code> function. Obviously we don't have to select the element because it is already in the arguments and an angular element is currently compatible with jQuery if you include jQuery in your app. So what we need to do is</p>
+
+<ol>
+<li>include jQuery in your HTML</li>
+<li>call initialization function in directive link function</li>
+</ol>
+
+
+<p>```
+link: function (scope, elem, attrs) {</p>
+
+<pre><code>elem.spectrum();
+...
+</code></pre>
+
+<p>}
+```</p>
+
+<h2>Data binding with ng-model</h2>
+
+<p>Read the code first.</p>
+
+<p>```
+angular.module('foo').directive('colorpicker', function(){
+  return {</p>
+
+<pre><code>require: '?ngModel',
+link: function (scope, elem, attrs, ngModel) {
+  elem.spectrum();
+  if (!ngModel) return;
+  ngModel.$render = function () {
+    elem.spectrum('set', ngModel.$viewValue || '#fff');
+  };
+  elem.on('change', function () {
+    scope.$apply(function () {
+      ngModel.$setViewValue(elem.val());
+    });
+  });
+}
+</code></pre>
+
+<p>  }
+});
+```
+The key points in the code above are</p>
+
+<ol>
+<li>add dependency of <code>ng-model</code> by <code>require</code></li>
+<li>setup <code>$render</code> function to update the DOM element</li>
+<li>add event listener to update value when DOM element changes</li>
+</ol>
+
+
+<h2>More on NgModelController</h2>
+
+<p>You might be confused by <code>$viewValue</code> and <code>$setViewValue</code> at the beginning. Why model value is not mentioned here? After you read the document of <a href="http://docs.angularjs.org/api/ng.directive:ngModel.NgModelController">NgModelController</a>, you may wonder what are all these methods and properties.</p>
+
+<p>I'll try to explain the document in a more understandable way.</p>
+
+<h3>$render</h3>
+
+<blockquote><p>Called when the view needs to be updated.</p></blockquote>
+
+<p>Put a breakpoint on it and we know "when the view needs to be updated".</p>
+
+<p><code>ngModel.$render &lt;- ngModelWatch &lt;- Scope.$digest &lt;- Scope.$apply</code></p>
+
+<blockquote><p>It is expected that the user of the ng-model directive will implement this method.</p></blockquote>
+
+<p>So we implement it in our directive.</p>
+
+<h3>$setViewValue</h3>
+
+<blockquote><p>Read a value from view.</p></blockquote>
+
+<p>The first line of the document is misleading. The main purpose of this function is not read the view value but to update the model value as described in the third paragraph.</p>
+
+<blockquote><p>It internally calls all $parsers (including validators) and updates the $modelValue and the actual model path. Lastly it calls all registered change listeners.</p></blockquote>
+
+<p>And we should usually put it in DOM event handler and parse the value in the DOM as argument to this function.</p>
+
+<h3>$viewValue and $modelValue</h3>
+
+<p>If you don't push any <code>$formatters</code> or <code>$parsers</code>, the two values are actually the same. The relationship between these are as following</p>
+
+<p><code>
+$viewValue ==($parsers)==&gt; $modelValue
+$modelValue ==($formatters)==&gt; $viewValue
+</code></p>
+
+<p>An example of this will be storing date as an integer and display it in specified format.</p>
+
+<h2>Example</h2>
+
+<p>The full example can be found on <a href="http://plnkr.co/edit/RfRsWZ?p=preview">plunker</a></p>
+]]></content>
+  </entry>
+  
+</feed>
